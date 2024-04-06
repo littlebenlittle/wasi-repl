@@ -1,5 +1,0 @@
-package component:fs-loader;
-
-world loader {
-    export load: func(path: string) -> result<list<u8>, string>;
-}

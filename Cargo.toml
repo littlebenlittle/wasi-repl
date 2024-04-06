@@ -1,8 +1,6 @@
 [workspace]
 resolver = "2"
 members = [
-    "repl",
-    "modules/ipfs-loader",
-    "modules/fs-loader",
-    "modules/echo", "modules/hello-world",
+    "host",
+    "modules/hello-world",
 ]
