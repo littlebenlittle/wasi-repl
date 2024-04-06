@@ -13,6 +13,7 @@ fn main() -> wasmtime::Result<()> {
     // Instantiate the component
     let instance = linker.instantiate(&mut store, &component)?;
 
+    /*
     // Call the `greet` function
     let func = instance.get_func(&mut store, "greet").expect("greet export not found");
     let mut result = [wasmtime::component::Val::String("".into())];
@@ -20,6 +21,6 @@ fn main() -> wasmtime::Result<()> {
 
     // This should print out `Greeting: [String("Hello, Alice!")]`
     println!("Greeting: {:?}", result);
-
+    */
     Ok(())
 }
