@@ -48,8 +48,43 @@ pub unsafe fn __post_return_load<T: Guest>(arg0: *mut u8) {
         }
     }
 }
+#[doc(hidden)]
+#[allow(non_snake_case)]
+pub unsafe fn _export_ls_cabi<T: Guest>() -> *mut u8 {
+    let result0 = T::ls();
+    let ptr1 = _RET_AREA.0.as_mut_ptr().cast::<u8>();
+    match result0 {
+        Some(e) => {
+            *ptr1.add(0).cast::<u8>() = (1i32) as u8;
+            let vec2 = (e.into_bytes()).into_boxed_slice();
+            let ptr2 = vec2.as_ptr().cast::<u8>();
+            let len2 = vec2.len();
+            ::core::mem::forget(vec2);
+            *ptr1.add(8).cast::<usize>() = len2;
+            *ptr1.add(4).cast::<*mut u8>() = ptr2.cast_mut();
+        }
+        None => {
+            *ptr1.add(0).cast::<u8>() = (0i32) as u8;
+        }
+    };
+    ptr1
+}
+#[doc(hidden)]
+#[allow(non_snake_case)]
+pub unsafe fn __post_return_ls<T: Guest>(arg0: *mut u8) {
+    let l0 = i32::from(*arg0.add(0).cast::<u8>());
+    match l0 {
+        0 => (),
+        _ => {
+            let l1 = *arg0.add(4).cast::<*mut u8>();
+            let l2 = *arg0.add(8).cast::<usize>();
+            _rt::cabi_dealloc(l1, l2, 1);
+        }
+    }
+}
 pub trait Guest {
     fn load(path: _rt::String) -> Result<_rt::Vec<u8>, _rt::String>;
+    fn ls() -> Option<_rt::String>;
 }
 #[doc(hidden)]
 
@@ -63,6 +98,14 @@ macro_rules! __export_world_loader_cabi{
     #[export_name = "cabi_post_load"]
     unsafe extern "C" fn _post_return_load(arg0: *mut u8,) {
       $($path_to_types)*::__post_return_load::<$ty>(arg0)
+    }
+    #[export_name = "ls"]
+    unsafe extern "C" fn export_ls() -> *mut u8 {
+      $($path_to_types)*::_export_ls_cabi::<$ty>()
+    }
+    #[export_name = "cabi_post_ls"]
+    unsafe extern "C" fn _post_return_ls(arg0: *mut u8,) {
+      $($path_to_types)*::__post_return_ls::<$ty>(arg0)
     }
   };);
 }
@@ -123,11 +166,12 @@ pub(crate) use __export_loader_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.21.0:loader:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 190] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07B\x01A\x02\x01A\x04\x01\
-p}\x01j\x01\0\x01s\x01@\x01\x04paths\0\x01\x04\0\x04load\x01\x02\x04\x01\x1acomp\
-onent:fs-loader/loader\x04\0\x0b\x0c\x01\0\x06loader\x03\0\0\0G\x09producers\x01\
-\x0cprocessed-by\x02\x0dwit-component\x070.201.0\x10wit-bindgen-rust\x060.21.0";
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 205] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07Q\x01A\x02\x01A\x07\x01\
+p}\x01j\x01\0\x01s\x01@\x01\x04paths\0\x01\x04\0\x04load\x01\x02\x01ks\x01@\0\0\x03\
+\x04\0\x02ls\x01\x04\x04\x01\x1acomponent:fs-loader/loader\x04\0\x0b\x0c\x01\0\x06\
+loader\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.201\
+.0\x10wit-bindgen-rust\x060.21.0";
 
 #[inline(never)]
 #[doc(hidden)]
