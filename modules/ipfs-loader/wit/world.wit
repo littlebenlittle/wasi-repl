@@ -1,0 +1,12 @@
+package component:ipfs;
+
+interface client {
+    type data = string;
+    type cid = string;
+    put: func(data: data) -> cid;
+    get: func(cid: cid) -> option<data>;
+}
+
+world ipfs {
+    export client;
+}

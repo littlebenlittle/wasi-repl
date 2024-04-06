@@ -1,0 +1,5 @@
+package component:echo;
+
+world ipfs {
+    export eval: func(expr: list<string>) -> string;
+}
